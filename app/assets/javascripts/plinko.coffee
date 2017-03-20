@@ -22,7 +22,8 @@ class Chip
       22,
       friction: 0.001,
       restitution: 0.75,
-      sleepThreshold: 10
+      sleepThreshold: 10,
+      isChip: true
     )
 
 placePegs = ->
@@ -34,11 +35,11 @@ placePegs = ->
   while i < 13
     y = y + 50
     if i % 2 == 0
-      cols = 10
-      offset = 50
+      cols = 8
+      offset = 110
     else
-      cols = 9
-      offset = 80
+      cols = 7
+      offset = 140
     j = 0
     x = offset
     while j < cols
@@ -61,7 +62,7 @@ placeWalls = ->
   i = 0
   while i < 6
     polygons = polygons.concat Bodies.fromVertices(60, 119 + 100 * i, leftWallTriangle, isStatic: true)
-    polygons = polygons.concat Bodies.fromVertices(578, 119 + 100 * i, rightWallTriangle, isStatic: true)
+    polygons = polygons.concat Bodies.fromVertices(580, 119 + 100 * i, rightWallTriangle, isStatic: true)
     i++
 
 placeBinWalls = ->
@@ -77,12 +78,14 @@ placeSlotNumbers = (p) ->
   i = 1
   while i < 10
     p.textSize(32)
+    p.fill(0)
     p.text(parseInt(i), 10 + i * 60, 55)
     i++
   return
 
 placeBinScores = (p) ->
   p.translate(0, 820)
+  p.fill(0)
   p.rotate(-Math.PI / 2 )
   scores = ['100','500','1000','- 0 -','10,000','- 0 -','1000','500','100']
   i = 0
@@ -91,9 +94,23 @@ placeBinScores = (p) ->
     i++
 
 placeSensors = ->
-  sens = Bodies.rectangle(80, 788, 55, 80, isSensor: true, isStatic: true)
-  rectangles.push sens
-  return
+  scores = [100, 500, 1000, 0, 10000, 0, 1000, 500, 100]
+  offset = 80
+  i = 0
+  while i < scores.length
+    rectangles.push(
+      Bodies.rectangle(
+        offset + (60 * i),
+        788,
+        55,
+        80,
+        isSensor: true,
+        isStatic: true,
+        category: 'score',
+        value: scores[i]
+      )
+    )
+    i++
 
 dropChip = (gate) ->
   chip = new Chip(gate)
@@ -106,7 +123,6 @@ dropChip = (gate) ->
 $(document).on('keyup', ->
   dropChip(Math.floor(Math.random() * 9) + 1)
 )
-
 
 rectX = (body) ->
   body.position.x - (rectWidth(body) / 2)
@@ -128,6 +144,25 @@ play = ->
   ), 4000)
   return
 
+drawEllipse = (p, body) ->
+  if body.isChip
+    p.fill(255, 0, 0)
+  else
+    p.fill(0)
+  p.ellipse(body.position.x, body.position.y, body.circleRadius * 2)
+  return
+
+drawRect = (p, body) ->
+  p.fill(0)
+  p.rect(rectX(body), rectY(body), rectWidth(body), rectHeight(body)) if !body.isSensor
+  return
+
+drawPoly = (p, body) ->
+  p.fill(0)
+  vc = body.vertices
+  p.triangle(vc[0].x, vc[0].y, vc[1].x, vc[1].y, vc[2].x, vc[2].y)
+  return
+
 myp = new p5 (p) ->
   p.setup = ->
     p.frameRate(30)
@@ -145,22 +180,19 @@ myp = new p5 (p) ->
     World.add engine.world, rectangles
     World.add engine.world, polygons
 
+    Events.on(engine, "collisionStart", (event) ->
+      console.log(event.pairs[0]) if event.pairs[0].bodyA.isSensor || event.pairs[0].bodyB.isSensor
+      return
+    )
     Engine.run engine
     return
 
   p.draw = ->
     p.clear()
     $.each engine.world.bodies, (_i, body) ->
-      p.ellipse(body.position.x, body.position.y, body.circleRadius * 2) if body.label == "Circle Body"
-      p.rect(rectX(body), rectY(body), rectWidth(body), rectHeight(body)) if body.label == "Rectangle Body"
-      if body.label == "Body"
-        vc = body.vertices
-        i = 0
-        while i < vc.length - 1
-          p.line(vc[i].x, vc[i].y, vc[i+1].x, vc[i+1].y)
-          i++
-        p.line(vc[0].x, vc[0].y, vc[vc.length-1].x, vc[vc.length-1].y)
-
+      drawEllipse(p, body) if body.label == "Circle Body"
+      drawRect(p, body) if body.label == "Rectangle Body"
+      drawPoly(p, body) if body.label == "Body"
       Events.on body, 'sleepStart', (event) ->
         if !(body.isStatic)
           Matter.Composite.remove(engine.world, body)
