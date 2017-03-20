@@ -21,7 +21,8 @@ class Chip
       20,
       22,
       friction: 0.001,
-      restitution: 0.75
+      restitution: 0.75,
+      sleepThreshold: 10
     )
 
 placePegs = ->
@@ -89,17 +90,21 @@ placeBinScores = (p) ->
     p.text(scores[i], 10, 90 + i * 60)
     i++
 
+placeSensors = ->
+  sens = Bodies.rectangle(80, 788, 55, 80, isSensor: true, isStatic: true)
+  rectangles.push sens
+  return
+
 dropChip = (gate) ->
   chip = new Chip(gate)
   console.log(chip.body())
-  chipIds = chipIds.concat(chip.body.id)
   circles.push(chip.body())
   World.add engine.world, chip.body()
   Engine.update(engine)
   return
 
 $(document).on('keyup', ->
-    dropChip(Math.floor(Math.random() * 9) + 1)
+  dropChip(Math.floor(Math.random() * 9) + 1)
 )
 
 
@@ -115,8 +120,17 @@ rectWidth = (body) ->
 rectHeight = (body) ->
   body.bounds.max.y - body.bounds.min.y
 
+play = ->
+  setTimeout((->
+    dropChip(Math.floor(Math.random() * 9) + 1)
+    play()
+    return
+  ), 4000)
+  return
+
 myp = new p5 (p) ->
   p.setup = ->
+    p.frameRate(30)
     engine = Engine.create(enableSleeping: true)
     engine.world = World.create({ gravity: { x: 0, y: 1, scale: 0.0009 } })
 
@@ -124,6 +138,7 @@ myp = new p5 (p) ->
     placePegs()
     placeWalls()
     placeBinWalls()
+    placeSensors()
     rectangles.push Bodies.rectangle(320, 830, 641, 10, isStatic: true) # floor
 
     World.add engine.world, circles
@@ -148,10 +163,11 @@ myp = new p5 (p) ->
 
       Events.on body, 'sleepStart', (event) ->
         if !(body.isStatic)
-          console.log 'body id', body.id, 'sleeping:', body.isSleeping
           Matter.Composite.remove(engine.world, body)
         return
       return
     placeSlotNumbers(p)
     placeBinScores(p)
     return
+
+play()
