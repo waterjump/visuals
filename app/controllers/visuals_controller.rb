@@ -5,15 +5,14 @@ class VisualsController < ApplicationController
   def faded
     results = GoogleCustomSearchApi.search(
       params['q'],
-      search_type: 'image',
-      img_size: 'large'
+      'searchType' => 'image',
+      'imgSize' => 'huge',
+      'imgColorType' => 'gray'
     )
     @images = results.items.map do |i|
-      next unless i['pagemap'].present?
-      next unless i['pagemap']['cse_image'].present?
-      i['pagemap']['cse_image'].first['src']
+      i['link']
     end.uniq.first(5).join(',')
-    Rails.logger.info "69BOT - @images: #{results}"
+    Rails.logger.info "69BOT - @images: #{@images}"
   end
 
   def sfo
