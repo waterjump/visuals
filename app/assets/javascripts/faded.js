@@ -2,18 +2,9 @@ $(function(){
   if ($('#faded').length === 0) {
     return;
   }
-  var backgrounds = '',
-      positions = '';
+  var backgrounds = '';
+  var finishLine = 0;
   var urls = $('.layer').data('urls').split(',');
-  console.log(urls);
-  $('.layer').fadeOut(10);
-  var preload = function(array) {
-    $(array).each(function(){
-      $('<img/>')[0].src = this;
-    });
-    $('.layer').css('background-image', backgrounds);
-    $('.layer').fadeIn();
-  }
 
   $(urls).each(function(){
     if (backgrounds.length > 0) {
@@ -22,7 +13,25 @@ $(function(){
     backgrounds = backgrounds + 'url(' + this + ')';
   });
 
-  console.log(backgrounds);
+  var display = function() {
+    $('.layer').css('background-image', backgrounds);
+    $('.layer').fadeIn(2000);
+  };
+
+  var finish = function() {
+    finishLine = finishLine + 1
+    if (finishLine === 5) {
+      display();
+    }
+  };
+
+  var preload = function(array) {
+    $(array).each(function(){
+      var q = new Image
+      q.onload = finish;
+      q.src = this;
+    });
+  };
+
   preload(urls);
-  // $('.layer').css('background-image', backgrounds);
 });
