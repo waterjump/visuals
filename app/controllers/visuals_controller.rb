@@ -3,16 +3,19 @@ class VisualsController < ApplicationController
   end
 
   def faded
-    results = GoogleCustomSearchApi.search(
-      params['q'],
-      'searchType' => 'image',
-      'imgSize' => 'huge',
-      'imgColorType' => 'gray'
-    )
-    @images = results.items.map do |i|
-      i['link']
-    end.uniq.first(5).join(',')
-    Rails.logger.info "69BOT - @images: #{@images}"
+    respond_to do |format|
+      results = GoogleCustomSearchApi.search(
+        params['q'],
+        'searchType' => 'image',
+        'imgSize' => 'huge',
+        'imgColorType' => 'gray'
+      )
+      @images = results.items.map do |i|
+        i['link']
+      end.uniq.first(8)
+      format.json { render json: @images }
+      format.html { render }
+    end
   end
 
   def sfo
