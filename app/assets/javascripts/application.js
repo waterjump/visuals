@@ -13,5 +13,5 @@
 //= require jquery
 //= require jquery_ujs
 //= require turbolinks
-//= require matter.min.js
+//= require faded
 //= require_tree .

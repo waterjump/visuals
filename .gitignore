@@ -19,3 +19,5 @@
 *.swp
 *.swo
 secrets.yml
+node_modules
+public/assets

@@ -1,6 +1,9 @@
 source 'https://rubygems.org'
 
 
+gem 'babel-transpiler'
+gem 'sprockets'
+gem 'sprockets-bumble_d'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.2.7'
 # Use SCSS for stylesheets
