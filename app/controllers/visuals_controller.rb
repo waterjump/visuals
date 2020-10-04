@@ -20,7 +20,4 @@ class VisualsController < ApplicationController
 
   def sfo
   end
-
-  def plinko
-  end
 end

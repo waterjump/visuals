@@ -6,7 +6,6 @@ Rails.application.routes.draw do
   root 'visuals#cases'
   get 'faded' => 'visuals#faded'
   get 'sfo' => 'visuals#sfo'
-  get 'plinko' => 'visuals#plinko'
 
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'
