@@ -111,6 +111,10 @@ $(function() {
         'tokyo','philadelphia','cgi','computer graphics','fighter jet','pattern',
         'synthesizer','katakana','water', 'kraftwerk', 'döner'
       ];
+      const urlParams = new URLSearchParams(window.location.search);
+      const myParam = urlParams.get('q');
+      return myParam;
+
       const term = terms[Math.floor(Math.random() * terms.length)];
       console.log(term);
       if ($.inArray(term, this.recentTerms) === -1) {
